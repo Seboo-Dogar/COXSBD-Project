@@ -1,0 +1,68 @@
+; This temporary file will be deleted
+
+; nest.js:
+
+src/
+├── middlewares/guard
+    ├──access-token.guard.ts                                                                                                                  
+├── modules
+│   ├── app
+│   │   ├── auth.controller.test.ts
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.module.ts
+│   ├── auth
+│   │   ├── auth.controller.test.ts
+│   │   ├── auth.controller.ts
+│   │   ├── auth.decorator.ts
+│   │   ├── auth.dto.ts
+│   │   ├── auth.guard.ts
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.test.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.strategy.ts
+    ├── database
+│       ├── database.modules.ts
+│       ├── database.prisma.ts
+│       ├── database.service.ts
+    └── hotel/
+        └── dto
+            ├── book.rooms.dto.ts
+            ├── create-hotel.dto.ts
+            ├── search-hotel.dto.ts
+            ├── update-hotel.dto.ts
+        └── entities
+            ├── hotel.entity.ts
+        ├── hotel.controler.spec.ts
+        ├── hotel.controler.ts
+        ├── hotel.modules.ts
+        ├── hotel.service.spec.ts
+        ├── hotel.service.ts
+    ├── user
+        ├── user.module.ts
+        ├── user.service.test.ts
+        ├── user.service.ts
+├── main.ts
+
+; node.js:
+
+src/
+├── index.ts               
+├── routes/                
+│   ├── auth.routes.ts
+│   └── hotel.routes.ts
+├── controllers/
+│   ├── auth.controller.ts
+│   └── hotel.controller.ts
+├── services/
+│   ├── auth.service.ts
+│   └── hotel.service.ts
+├── middlewares/
+│   ├── accessToken.middleware.ts
+├── prisma/                 
+│   ├── database.service.ts
+├── utils/
+│   ├── jwt.ts              
+.env
+
+

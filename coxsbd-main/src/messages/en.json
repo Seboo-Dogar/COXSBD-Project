@@ -1,0 +1,24 @@
+{
+  "Index": {
+    "title": "Welcome to COXS BD",
+    "description": "Your premium car rental service in Bangladesh"
+  },
+
+  "HeroBanner": {
+    "label": "B2B E-commerce Solution",
+    "title": "The Leading B2B E-commerce Platform",
+    "description": "Source from 200M+ products and 200,000+ suppliers with powerful tools built specifically for business buyers.",
+    "requestQuote": "Request for Quotation",
+    "readyToShip": "Ready to Ship Products"
+  },
+
+  "Header": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact"
+  },
+  
+  "Footer": {
+    "rights": "All rights reserved."
+  }
+}

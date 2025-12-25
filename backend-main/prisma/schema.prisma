@@ -1,0 +1,552 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator seed {
+  provider = "ts-node prisma/seed.ts"
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String
+  role              Role      @default(CUSTOMER)
+  refreshToken     String?
+  registeredAt    DateTime  @default(now())
+  bookings          Booking[]
+  payments          Payment[]
+  messagesSent      Message[] @relation("SentMessages")
+  messagesReceived  Message[] @relation("ReceivedMessages")
+  flights           Flight[]
+  tours             Tour[]
+}
+
+model Hotel {
+  id             String    @id @default(uuid())
+  name           String
+  description    String
+  stars          Int
+  featuredImage  String
+  gallery        String    @db.LongText
+  enabled        Boolean   @default(true)
+  featured       Boolean   @default(false)
+  locationName   String
+  lat            Float
+  lng            Float
+  email          String
+  phone          String
+  website        String?
+  facebook       String?
+  twitter        String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  maxRate        Float     @default(0)
+  minRate        Float     @default(0)
+  bookings       Booking[]
+  rooms          Room[]
+}
+
+model Room {
+  id          String       @id @default(uuid())
+  type        String
+  description String
+  price       Decimal
+  capacity    Int
+  currency    CurrencyCode @default(BDT)
+  amenities   String       @db.LongText
+  hotelId     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  quantity    Int          @default(30)
+  bookings    Booking[]
+  hotel       Hotel        @relation(fields: [hotelId], references: [id])
+
+  @@index([hotelId], map: "Room_hotelId_fkey")
+}
+
+model Booking {
+  id              String        @id @default(uuid())
+  userId          String
+  hotelId         String
+  roomTypeId      String
+  checkIn         DateTime
+  checkOut        DateTime
+  numberOfRooms   Int
+  totalPrice      Float
+  status          BookingStatus @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  hotel           Hotel         @relation(fields: [hotelId], references: [id])
+  roomType        Room          @relation(fields: [roomTypeId], references: [id])
+  user            User          @relation(fields: [userId], references: [id])
+  payments        Payment[]
+
+  @@index([hotelId], map: "Booking_hotelId_fkey")
+  @@index([roomTypeId], map: "Booking_roomTypeId_fkey")
+  @@index([userId], map: "Booking_userId_fkey")
+}
+
+model HotelApiProvider {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  isActive    Boolean  @default(true)
+  credentials String   @db.LongText
+  rateLimit   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  authMethod  String?  @default("x_signature")
+}
+
+model Payment {
+  id        String       @id @default(uuid())
+  bookingId String
+  userId    String
+  amount    Float
+  currency  CurrencyCode @default(BDT)
+  status    String       @default("PENDING")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([bookingId])
+  @@index([userId])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  text       String
+  senderId   String
+  receiverId String
+  createdAt  DateTime @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
+model Currency {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  name      String
+  rateToUSD Float
+  createdAt DateTime @default(now())
+}
+
+model Car {
+  id            String    @id @default(uuid())
+  name          String
+  model         String
+  year          Int
+  features      Json      @db.Json 
+  price         String    
+  numericPrice  Float     
+  rating        Float
+  transmission  String
+  seats         Int
+  fuelType      String
+  available     Boolean   @default(true)
+  category      String
+  mileage       String
+  reviews       Int
+  originalPrice String?
+  discount      String?
+  description   String?   @db.LongText
+  img           String?   @db.Text
+
+  @@map("car_listings")
+}
+
+model BusTrip {
+  id              String   @id @default(uuid())
+  operator        String
+  busType         String   
+  departureTime   String
+  arrivalTime     String
+  duration        String
+  pricePerSeat    Float
+  totalSeats      Int      @default(40)
+  availableSeats  Int      @default(40)
+  rating          Float    @default(0.0)
+  available       Boolean  @default(true)
+  
+  // Stores: { "bookedSeats": ["A1", "B2"], "amenities": ["WiFi", "AC"] }
+  busData         Json?    
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("bus_trips")
+}
+model Flight {
+  id             String     @id @default(uuid())
+  status         Boolean    @default(true)
+  userId         String
+  airlineId      String
+  fromAirportId  String
+  toAirportId    String
+  adultSeatPrice Decimal
+  childPrice     Decimal
+  infantPrice    Decimal
+  duration       String
+  departureTime  DateTime
+  arrivalTime    DateTime
+  baggage        String
+  cabinBaggage   String
+  type           FlightType @default(ECONOMY)
+  refundable     Boolean    @default(false)
+  offer          Boolean    @default(false)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  user       User     @relation(fields: [userId], references: [id])
+  airline    Airline  @relation(fields: [airlineId], references: [id])
+  fromAirport Airport @relation("FlightFromAirport", fields: [fromAirportId], references: [id])
+  toAirport   Airport @relation("FlightToAirport", fields: [toAirportId], references: [id])
+
+  @@index([userId])
+  @@index([airlineId])
+  @@index([fromAirportId])
+  @@index([toAirportId])
+}
+
+model Airport {
+  id        String   @id @default(uuid())
+  status    Boolean  @default(true)
+  code      String   @unique
+  airport   String
+  city      String
+  country   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  flightsFrom           Flight[]          @relation("FlightFromAirport")
+  flightsTo             Flight[]          @relation("FlightToAirport")
+  flightFeaturedFrom    FlightFeatured[]  @relation("FromAirport")
+  flightFeaturedTo      FlightFeatured[]  @relation("ToAirport")
+}
+
+model Airline {
+  id        String   @id @default(uuid())
+  status    Boolean  @default(true)
+  iata      String   @unique
+  name      String
+  code      String   @unique
+  country   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  flights        Flight[]         @relation
+  flightFeatured FlightFeatured[] @relation
+}
+
+model FlightFeatured {
+  id          String   @id @default(uuid())
+  status      Boolean  @default(true)
+  airlineId   String
+  fromAirportId String
+  toAirportId   String
+  price       Decimal
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  airline     Airline  @relation(fields: [airlineId], references: [id])
+  fromAirport Airport  @relation("FromAirport", fields: [fromAirportId], references: [id])
+  toAirport   Airport  @relation("ToAirport", fields: [toAirportId], references: [id])
+
+  @@index([airlineId])
+  @@index([fromAirportId])
+  @@index([toAirportId])
+}
+
+model FlightSuggestion {
+  id          String         @id @default(uuid())
+  status      Boolean        @default(true)
+  type        SuggestionType
+  cityAirport String
+  order       Int
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model TourType {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tours Tour[]
+}
+
+model TourInclusion {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tours Tour[]
+}
+
+model TourExclusion {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tours Tour[]
+}
+
+model Tour {
+  id            String         @id @default(uuid())
+  status        Boolean        @default(true)
+  featured      Boolean        @default(false)
+  offer         Boolean        @default(false)
+  tourTypeId    String
+  name          String
+  currency      CurrencyCode   @default(BDT)
+  userId        String
+  refundable    Boolean        @default(false)
+  stars         Int
+  rating        Float
+  adultPrice    Decimal
+  childPrice    Decimal
+  maxAdults     Int
+  maxChild      Int
+  description   String         @db.LongText
+  policy        String         @db.LongText
+  location      String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  tourType      TourType       @relation(fields: [tourTypeId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  inclusions    TourInclusion[]
+  exclusions    TourExclusion[]
+
+  @@index([tourTypeId])
+  @@index([userId])
+}
+
+model TourSuggestion {
+  id        String   @id @default(uuid())
+  status    Boolean  @default(true)
+  city      String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VisaFromCountry {
+  id        String   @id @default(uuid())
+  country   String
+  status    Boolean  @default(true)
+  nicename  String
+  iso       String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  visaBookings VisaBooking[] @relation("VisaFromCountry")
+}
+
+model VisaToCountry {
+  id        String   @id @default(uuid())
+  country   String
+  status    Boolean  @default(true)
+  nicename  String
+  iso       String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  visaBookings VisaBooking[] @relation("VisaToCountry")
+}
+
+model VisaBooking {
+  id          String       @id @default(uuid())
+  status      VisaStatus   @default(WAITING)
+  fromCountryId String
+  toCountryId   String
+  date        DateTime
+  firstName   String
+  lastName    String
+  email       String
+  phone       String
+  days        Int
+  entryType   String
+  visaType    String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  fromCountry VisaFromCountry @relation("VisaFromCountry", fields: [fromCountryId], references: [id])
+  toCountry   VisaToCountry   @relation("VisaToCountry", fields: [toCountryId], references: [id])
+
+  @@index([fromCountryId])
+  @@index([toCountryId])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum CurrencyCode {
+  BDT
+  USD
+  EUR
+  INR
+  GBP
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  MERCHANT
+}
+
+enum FlightType {
+  ECONOMY
+  ECONOMY_PREMIUM
+  BUSINESS
+  FIRST
+}
+
+enum SuggestionType {
+  FROM_DESTINATION
+  TO_DESTINATION
+}
+
+enum VisaStatus {
+  WAITING
+  PROGRESS
+  DONE
+}
+
+model MainSettings {
+  id              String    @id @default(uuid())
+  businessName    String
+  domainName      String
+  licenseKey      String
+  websiteOffline  Boolean   @default(false)
+  offlineMessage  String?   @db.LongText
+  defaultColor    String
+  themeName       ThemeName @default(DEFAULT)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model SeoSettings {
+  id              String    @id @default(uuid())
+  metaTitle       String?   @db.LongText
+  metaDescription String?   @db.LongText
+  xmlSitemap      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model AccountSettings {
+  id                    String    @id @default(uuid())
+  guestBooking          Boolean   @default(true)
+  usersRegistration     Boolean   @default(true)
+  suppliersRegistration Boolean   @default(false)
+  agentsRegistration    Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model SystemSettings {
+  id            String    @id @default(uuid())
+  trackingScript String?  @db.LongText
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ContactSettings {
+  id            String    @id @default(uuid())
+  address       String?   @db.LongText
+  addressOnMap  String?
+  contactEmail  String?
+  contactPhone  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model AppStoresLinks {
+  id              String    @id @default(uuid())
+  androidStoreLink String?
+  iosStoreLink     String?
+  showApps         Boolean  @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Branding {
+  id              String    @id @default(uuid())
+  businessLogo    String?
+  favicon         String?
+  homepageCover   String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model LanguageCurrencies {
+  id              String    @id @default(uuid())
+  multiLanguage   Boolean   @default(false)
+  multiCurrency   Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model SocialLinks {
+  id              String    @id @default(uuid())
+  facebook        String?
+  twitter         String?
+  linkedin        String?
+  instagram       String?
+  google          String?
+  youtube         String?
+  whatsapp        String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+enum ThemeName {
+  AIRBNB
+  ARAKIS
+  BIZE
+  CHEAPTICKETS
+  DEFAULT
+  FLYIN
+  QATARAIRWAYS
+  TRIP
+  VIATOR
+  WAKANOW
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id                String   @id @default(uuid())
+  title             String
+  description       String?  @db.LongText
+  priceUSD          Float
+  originalPriceUSD  Float?
+  image             String?  // URL or path to uploaded image
+  rating            Float    @default(0)
+  reviewCount       Int      @default(0)
+  category          String
+  isNew             Boolean  @default(false)
+  isBestSeller      Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

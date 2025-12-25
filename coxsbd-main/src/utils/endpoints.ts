@@ -1,0 +1,14 @@
+export const FLIGHTS_API = "/flights";
+export const AIRPORTS_API = "/airports";
+export const AIRLINES_API = "/airlines";
+export const FLIGHT_FEATURED_API = "/flight-featured";
+export const FLIGHT_SUGGESTION_API = "/flight-suggestion";
+export const TOUR_TYPE_API = "/tour-type";
+export const TOUR_INCLUSION_API = "/tour-inclusion";
+export const TOUR_EXCLUSION_API = "/tour-exclusion";
+export const TOUR_SUGGESTION_API = "/tour-suggestion";
+export const TOURS_API = "/tours";
+export const VISA_FROM_COUNTRY_API = "/visa-from-countries";
+export const VISA_TO_COUNTRY_API = "/visa-to-countries";
+export const VISA_BOOKING_API = "/visa-bookings";
+export const USERS_API = "/users";

@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  role     Role @default(CUSTOMER)
+  bookings    Booking[]   // Add this relation
+
+  refreshToken String?
+  registeredAt DateTime @default(now())
+}
+
+model Hotel {
+  id             String         @id @default(uuid())
+  name           String
+  description    String
+  stars          Int
+  featuredImage  String
+  gallery        Json           // Stores array of image URLs
+  enabled        Boolean        @default(true)
+  featured       Boolean        @default(false)
+  locationName   String
+  minRate       Float           @default(0.0)
+  maxRate       Float           @default(0.0)
+  lat            Float
+  lng            Float
+  email          String
+  phone          String
+  website        String?
+  facebook       String?
+  twitter        String?
+  rooms          Room[]
+  bookings      Booking[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Room {
+  id          String   @id @default(uuid())
+  type        String
+  description String
+  price       Decimal
+  capacity    Int
+  currency    Currency @default(BDT)
+  quantity    Int        @default(30)  
+  bookings    Booking[]
+  amenities   Json     // Stores array of amenities as strings
+  hotel       Hotel    @relation(fields: [hotelId], references: [id])
+  hotelId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Booking {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  hotelId        String
+  hotel          Hotel        @relation(fields: [hotelId], references: [id])
+  roomTypeId     String
+  roomType       Room         @relation(fields: [roomTypeId], references: [id])
+  checkIn        DateTime
+  checkOut       DateTime
+  numberOfRooms  Int
+  totalPrice     Float
+  status         BookingStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model HotelApiProvider {
+  id          String   @id @default(uuid())
+  name        String   // "Hotelbeds", "Expedia", etc.
+  slug        String   @unique // "hotelbeds", "expedia"
+  isActive    Boolean  @default(true)
+  credentials Json     // { apiKey: "", secret: "", baseUrl: "" }
+  rateLimit   Int?     // Optional API call limit
+  authMethod  String?  @default("x_signature") // Add this field
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum Currency {
+  BDT
+  USD
+  EUR
+  INR
+  GBP
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  MERCHANT
+}

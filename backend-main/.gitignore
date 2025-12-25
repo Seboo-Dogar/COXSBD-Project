@@ -1,0 +1,89 @@
+./build
+./.env
+.env
+.idea
+node_modules
+.DS_Store
+build
+.vercel
+dist
+# -------------------------------------------------------------------
+# 1. DEPENDENCIES & DIRECTORIES
+# -------------------------------------------------------------------
+# Node dependencies folder
+/node_modules
+
+# Output of `npm install` or `yarn install`
+.npm
+
+# Prisma local database files
+# If you use a local file-based database (like SQLite), ignore the actual database file
+# Example:
+# *.sqlite
+# /prisma/*.sqlite
+
+# -------------------------------------------------------------------
+# 2. ENVIRONMENT FILES (SECURITY CRITICAL)
+# -------------------------------------------------------------------
+# Contains secret keys, connection strings, etc.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging.local
+
+# -------------------------------------------------------------------
+# 3. LOGS & DEBUGGING
+# -------------------------------------------------------------------
+# Standard npm/yarn debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS-specific log files
+*.log
+*.pnpm-debug.log
+
+# -------------------------------------------------------------------
+# 4. BUILD / ARTIFACTS
+# -------------------------------------------------------------------
+
+# 4A. TypeScript & JavaScript Artifacts
+# TypeScript cache/build info
+.tsbuildinfo
+*.js.map
+*.d.ts.map
+
+# Next.js / Frontend Build Output
+# Next.js build output directory
+/.next/
+# Vercel deployment folder (if using Vercel)
+.vercel/
+
+# Backend Build Output (e.g., Express build)
+# Typically where TypeScript compiles JS files (e.g., 'dist', 'build', 'out')
+/dist/
+/build/
+
+# -------------------------------------------------------------------
+# 5. OS & EDITOR FILES
+# -------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
